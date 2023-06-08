@@ -1,2 +1,2 @@
 # bili_qrcode_login
-二维码登录
+B站二维码登录

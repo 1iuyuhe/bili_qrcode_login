@@ -1,6 +1,7 @@
 import requests
 import qrcode
 import json
+import http.cookiejar
 
 
 qrcode_url = 'https://passport.bilibili.com/x/passport-login/web/qrcode/generate'
@@ -10,6 +11,7 @@ headers = {
 }
 
 s = requests.Session()
+s.cookies = http.cookiejar.MozillaCookieJar(filename='cookies.txt')
 r = s.get(url=qrcode_url, headers=headers)
 resp = json.loads(r.text)
 url = resp['data']['url']
@@ -17,7 +19,10 @@ qrcode_key = resp['data']['qrcode_key']
 
 qr = qrcode.QRCode()
 qr.add_data(url)
+qr.make(fit=True)
 qr.print_ascii()
+img = qr.make_image(fill_color='black', back_color='white')
+img.save('qrcode.png')
 
 while True:
     data = {
@@ -28,8 +33,7 @@ while True:
     code = resp['data']['code']
     if code == 0:
         print(f'[code={code}]: 扫码登录成功')
-        for k, v in s.cookies.items():
-            print(f'{k}={v}')
+        s.cookies.save()
         break
     elif code == 86038:
         print(f'[code={code}]: 已失效', end='\r')
